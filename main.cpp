@@ -14,19 +14,8 @@ bool isEven(int num) {
     return num % 2 == 0;  // 偶数の場合はtrueを返す
 }
 
-// 結果を判定して表示するコールバック関数
-void displayResult(bool correct) {
-    // 結果を表示
-    if (correct) {
-        printf("正解!\n");
-    }
-    else {
-        printf("不正解!\n");
-    }
-}
-
 // ゲームロジックを実行する関数
-void playGame(std::function<void(bool)> callback) {
+void playGame() {
     int dice = rollDice();  // ランダムにサイコロを振る
     printf("サイコロを振りました...\n");
 
@@ -34,20 +23,30 @@ void playGame(std::function<void(bool)> callback) {
     printf("奇数 (1) か偶数 (0) かを予想してください: ");
     scanf_s("%d", &userChoice);  // scanf_sを使用
 
+    // 3秒待つ
+    std::this_thread::sleep_for(std::chrono::seconds(3));  // ユーザーが答えた後に3秒待つ
+
     // 結果を判定
     bool diceIsEven = isEven(dice);
     bool correct = (userChoice == 0 && diceIsEven) || (userChoice == 1 && !diceIsEven);
 
-    // 3秒待つ
-    std::this_thread::sleep_for(std::chrono::seconds(3));  // ユーザーが答えた後に3秒待つ
+    // ラムダ式を使用して結果を表示
+    auto displayResult = [](bool correct) {
+        if (correct) {
+            printf("正解!\n");
+        }
+        else {
+            printf("不正解!\n");
+        }
+        };
 
-    callback(correct);  // 結果をコールバックで返す
+    displayResult(correct);  // ラムダ式を呼び出す
 }
 
 int main() {
     srand(static_cast<unsigned int>(time(0)));  // ランダムシードの設定
 
-    playGame(displayResult);  // ゲームを実行し、結果を表示する
+    playGame();  // ゲームを実行
 
     return 0;
 }
