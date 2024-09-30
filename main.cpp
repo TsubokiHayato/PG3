@@ -1,40 +1,53 @@
-#include <stdio.h>
+#include <cstdio>
+#include <cstdlib>
+#include <ctime>
+#include <thread>
+#include <functional>
 
-// 再雇用賃金を再帰的に計算する関数
-int calculateReemploymentWage(int hoursWorked) {
-    if (hoursWorked == 1) {
-        return 100; // 最初の1時間目は100円
+// サイコロを振る関数
+int rollDice() {
+    return rand() % 6 + 1;  // 1から6までのランダムな整数を生成
+}
+
+// 判定関数（奇数か偶数かを判定）
+bool isEven(int num) {
+    return num % 2 == 0;  // 偶数の場合はtrueを返す
+}
+
+// 結果を判定して表示するコールバック関数
+void displayResult(bool correct) {
+    // 結果を表示
+    if (correct) {
+        printf("正解!\n");
     }
-    int previousWage = calculateReemploymentWage(hoursWorked - 1);
-    return (previousWage * 2) - 50; // 前の時給を2倍し、50円減らす
+    else {
+        printf("不正解!\n");
+    }
+}
+
+// ゲームロジックを実行する関数
+void playGame(std::function<void(bool)> callback) {
+    int dice = rollDice();  // ランダムにサイコロを振る
+    printf("サイコロを振りました...\n");
+
+    int userChoice;
+    printf("奇数 (1) か偶数 (0) かを予想してください: ");
+    scanf_s("%d", &userChoice);  // scanf_sを使用
+
+    // 結果を判定
+    bool diceIsEven = isEven(dice);
+    bool correct = (userChoice == 0 && diceIsEven) || (userChoice == 1 && !diceIsEven);
+
+    // 3秒待つ
+    std::this_thread::sleep_for(std::chrono::seconds(3));  // ユーザーが答えた後に3秒待つ
+
+    callback(correct);  // 結果をコールバックで返す
 }
 
 int main() {
-    int generalWagePerHour = 1072; // 一般賃金（1時間あたり）
-    int hoursWorked = 0;  // 労働時間
+    srand(static_cast<unsigned int>(time(0)));  // ランダムシードの設定
 
-    int generalTotalWage = 0;  // 一般賃金の合計
-    int reemploymentTotalWage = 0;  // 再雇用賃金の合計
-
-    // 再雇用賃金が一般賃金を超えるまで比較するループ
-    while (reemploymentTotalWage <= generalTotalWage) {
-        ++hoursWorked;
-        generalTotalWage = hoursWorked * generalWagePerHour;
-
-        // 再帰関数を使用して再雇用賃金を計算
-        reemploymentTotalWage = calculateReemploymentWage(hoursWorked);
-
-        // 各時間ごとの賃金比較をprintfで表示
-        printf("時間 %d: 一般賃金: %d, 再雇用賃金: %d\n", hoursWorked, generalTotalWage, reemploymentTotalWage);
-
-        // 再雇用賃金がマイナスになった場合は終了
-        if (reemploymentTotalWage < 0) {
-            printf("再雇用賃金が0未満になりました。計算を停止します。\n");
-            break;
-        }
-    }
-
-    printf("再雇用賃金が一般賃金を超えるのは %d 時間後です。\n", hoursWorked);
+    playGame(displayResult);  // ゲームを実行し、結果を表示する
 
     return 0;
 }
