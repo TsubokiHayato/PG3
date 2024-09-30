@@ -1,40 +1,40 @@
-#include<stdio.h>
+#include <stdio.h>
 
-// テンプレート関数
-template <typename T1, typename T2>
-T1 min(T1 a, T2 b) {
-    if (a > b) {
-        return static_cast<T1>(b); // 型の違いを考慮してキャスト
+// 再雇用賃金を再帰的に計算する関数
+int calculateReemploymentWage(int hoursWorked) {
+    if (hoursWorked == 1) {
+        return 100; // 最初の1時間目は100円
     }
-    else {
-        return a;
-    }
-}
-
-// char 型の特殊化
-template <>
-char min<char>(char a, char b) {
-  
-    return printf("数字以外は代入できません\n");; // 代入できないので0を返す（エラーハンドリング）
+    int previousWage = calculateReemploymentWage(hoursWorked - 1);
+    return (previousWage * 2) - 50; // 前の時給を2倍し、50円減らす
 }
 
 int main() {
-    int a = 8;
-    int b = 10;
-    float c = 1.14f;
-    float d = 5.14f;
-    double e = 3.64364;
-    double f = 1.14514;
+    int generalWagePerHour = 1072; // 一般賃金（1時間あたり）
+    int hoursWorked = 0;  // 労働時間
 
-    // charは1文字のみ
-    char g = 'A';
-    char h = 'B';
+    int generalTotalWage = 0;  // 一般賃金の合計
+    int reemploymentTotalWage = 0;  // 再雇用賃金の合計
 
-    // 各型の最小値を出力
-    printf("%d\n", min(a, b));          // intの比較
-    printf("%f\n", min(c, d));        // floatの比較
-    printf("%.6f\n", min(e, f));        // doubleの比較
-    printf("%c\n", min(g, h));          // charの比較（特殊化関数）
+    // 再雇用賃金が一般賃金を超えるまで比較するループ
+    while (reemploymentTotalWage <= generalTotalWage) {
+        ++hoursWorked;
+        generalTotalWage = hoursWorked * generalWagePerHour;
+
+        // 再帰関数を使用して再雇用賃金を計算
+        reemploymentTotalWage = calculateReemploymentWage(hoursWorked);
+
+        // 各時間ごとの賃金比較をprintfで表示
+        printf("時間 %d: 一般賃金: %d, 再雇用賃金: %d\n", hoursWorked, generalTotalWage, reemploymentTotalWage);
+
+        // 再雇用賃金がマイナスになった場合は終了
+        if (reemploymentTotalWage < 0) {
+            printf("再雇用賃金が0未満になりました。計算を停止します。\n");
+            break;
+        }
+    }
+
+    printf("再雇用賃金が一般賃金を超えるのは %d 時間後です。\n", hoursWorked);
 
     return 0;
 }
