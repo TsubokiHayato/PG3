@@ -1,10 +1,10 @@
 #include<iostream>
 #include<Windows.h>
 int main() {
-	SetConsoleOutputCP(65001);
+	
 
 	printf("Hello World\n");
-	printf("ハローワールド\n");
+	printf("こんにちは。俺は坪木勇人!\n");
 
 	return 0;
 }
