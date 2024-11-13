@@ -1,10 +1,18 @@
-#include<iostream>
-#include<Windows.h>
+#include <iostream>
+
+class Animal {
+public:
+    virtual void makeSound() { std::cout << "Some sound\n"; }
+};
+
+class Dog : public Animal {
+public:
+    void makeSound() override { std::cout << "Woof!\n"; }
+};
+
 int main() {
-	
-
-	printf("Hello World\n");
-	printf("こんにちは。俺は坪木勇人!\n");
-
-	return 0;
+    Animal* animal = new Dog();
+    animal->makeSound(); // "Woof!"
+    delete animal;
+    return 0;
 }
