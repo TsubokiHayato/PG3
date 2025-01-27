@@ -1,30 +1,57 @@
 #include <iostream>
-#include <string>
-#include <chrono>
+#include <list>
+
+class Station {
+public:
+    const char* name;
+    int year;
+
+    Station(const char* name, int year) : name(name), year(year) {}
+};
 
 int main() {
-    // 100000文字の'a'で初期化されたstd::stringを作成
-    std::string original(100000, 'a');
+    // 1970年代の駅（開業年順に配置）
+    std::list<Station> stations = {
+        Station("Shinjuku", 1885),
+        Station("Shibuya", 1885),
+        Station("Ikebukuro", 1903),
+        Station("Ueno", 1883),
+        Station("Tokyo", 1914)
+    };
 
-    // コピーの時間計測開始
-    auto start_copy = std::chrono::high_resolution_clock::now();
-    std::string copy = original; // コピー
-    auto end_copy = std::chrono::high_resolution_clock::now();
+    // 1970年代駅の後に西日暮里を追加
+    auto it = stations.begin();
+    for (; it != stations.end(); ++it) {
+        if (it->year > 1971) {
+            break;
+        }
+    }
+    stations.insert(it, Station("Nishi-Nippori", 1971));
 
-    // コピーにかかった時間を計算
-    auto duration_copy = std::chrono::duration_cast<std::chrono::microseconds>(end_copy - start_copy).count();
+    // 2019年代の駅を追加
+    stations.push_back(Station("Takanawa Gateway", 2022));
 
-    // 移動の時間計測開始
-    auto start_move = std::chrono::high_resolution_clock::now();
-    std::string moved = std::move(original); // 移動
-    auto end_move = std::chrono::high_resolution_clock::now();
+    // 駅名を英語表記で出力
+    std::cout << "Stations in 1970s:" << std::endl;
+    for (auto& station : stations) {
+        if (station.year >= 1970 && station.year < 1980) {
+            std::cout << station.name << " (" << station.year << ")" << std::endl;
+        }
+    }
 
-    // 移動にかかった時間を計算
-    auto duration_move = std::chrono::duration_cast<std::chrono::microseconds>(end_move - start_move).count();
+    std::cout << "\nStations in 2019s:" << std::endl;
+    for (auto& station : stations) {
+        if (station.year >= 2010 && station.year < 2020) {
+            std::cout << station.name << " (" << station.year << ")" << std::endl;
+        }
+    }
 
-    // 結果を表示
-    std::cout << "コピーにかかった時間: " << duration_copy << " マイクロ秒" << std::endl;
-    std::cout << "移動にかかった時間: " << duration_move << " マイクロ秒" << std::endl;
+    std::cout << "\nStations in 2020s:" << std::endl;
+    for (auto& station : stations) {
+        if (station.year >= 2020) {
+            std::cout << station.name << " (" << station.year << ")" << std::endl;
+        }
+    }
 
     return 0;
 }
