@@ -1,58 +1,29 @@
 #include <iostream>
-#include <fstream>
-#include <sstream>
-#include <vector>
-#include <thread>
-#include <mutex>
-#include <condition_variable>
-
-std::mutex mtx;
-std::condition_variable cv;
-bool data_ready = false;
-std::vector<std::vector<int>> map_data;
-
-void loadCSV(const std::string& filename) {
-    std::ifstream file(filename);
-    std::string line;
-    std::vector<std::vector<int>> temp_data;
-
-    while (std::getline(file, line)) {
-        std::istringstream ss(line);
-        std::string value;
-        std::vector<int> row;
-
-        while (std::getline(ss, value, ',')) {
-            row.push_back(std::stoi(value));
-        }
-        temp_data.push_back(row);
-    }
-
-    {
-        std::lock_guard<std::mutex> lock(mtx);
-        map_data = temp_data;
-        data_ready = true;
-    }
-    cv.notify_all();
-}
-
-void displayMap() {
-    std::unique_lock<std::mutex> lock(mtx);
-    cv.wait(lock, [] { return data_ready; });
-
-    for (const auto& row : map_data) {
-        for (const auto& cell : row) {
-            std::cout << cell << " ";
-        }
-        std::cout << std::endl;
-    }
-}
+#include <string>
+#include <chrono>
 
 int main() {
-    std::thread loader(loadCSV, "map.csv");
-    std::thread displayer(displayMap);
+    // 100000文字の'a'で初期化されたstd::stringを作成
+    std::string original(100000, 'a');
 
-    loader.join();
-    displayer.join();
+    // コピーの時間計測開始
+    auto start_copy = std::chrono::high_resolution_clock::now();
+    std::string copy = original; // コピー
+    auto end_copy = std::chrono::high_resolution_clock::now();
+
+    // 移動の時間計測開始
+    auto start_move = std::chrono::high_resolution_clock::now();
+    std::string moved = std::move(original); // 移動
+    auto end_move = std::chrono::high_resolution_clock::now();
+
+    // コピーにかかった時間を計算
+    auto duration_copy = std::chrono::duration_cast<std::chrono::microseconds>(end_copy - start_copy).count();
+    // 移動にかかった時間を計算
+    auto duration_move = std::chrono::duration_cast<std::chrono::microseconds>(end_move - start_move).count();
+
+    // 結果を表示
+    std::cout << "コピーにかかった時間: " << duration_copy << " マイクロ秒" << std::endl;
+    std::cout << "移動にかかった時間: " << duration_move << " マイクロ秒" << std::endl;
 
     return 0;
 }
