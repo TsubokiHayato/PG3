@@ -1,56 +1,41 @@
 #include <iostream>
-#include <list>
-
-class Station {
-public:
-    const char* name;
-    int year;
-
-    Station(const char* name, int year) : name(name), year(year) {}
-};
+#include <vector>
+#include <algorithm>
+#include <fstream>
+#include <sstream>
 
 int main() {
-    // 1970年代の駅（開業年順に配置）
-    std::list<Station> stations = {
-        Station("Shinjuku", 1885),
-        Station("Shibuya", 1885),
-        Station("Ikebukuro", 1903),
-        Station("Ueno", 1883),
-        Station("Tokyo", 1914)
-    };
+    // ASCIIファイルからメールアドレスを読み込む
+    std::ifstream file("emails.txt");
+    std::vector<std::string> emails;
+    std::string line;
 
-    // 1970年代駅の後に西日暮里を追加
-    auto it = stations.begin();
-    for (; it != stations.end(); ++it) {
-        if (it->year > 1971) {
-            break;
+    // ファイルが開けたかどうかを確認
+    if (file.is_open()) {
+        // ファイルから1行ずつ読み込む
+        while (std::getline(file, line)) {
+            std::istringstream iss(line);
+            std::string email;
+            // カンマ区切りでメールアドレスを分割してベクターに追加
+            while (std::getline(iss, email, ',')) {
+                emails.push_back(email);
+            }
         }
+        file.close(); // ファイルを閉じる
     }
-    stations.insert(it, Station("Nishi-Nippori", 1971));
-
-    // 2019年代の駅を追加
-    stations.push_back(Station("Takanawa Gateway", 2022));
-
-    // 駅名を英語表記で出力
-    std::cout << "Stations in 1970s:" << std::endl;
-    for (auto& station : stations) {
-        if (station.year >= 1970 && station.year < 1980) {
-            std::cout << station.name << " (" << station.year << ")" << std::endl;
-        }
+    else {
+        // ファイルが開けなかった場合のエラーメッセージ
+        std::cerr << "Unable to open file" << std::endl;
+        return 1;
     }
 
-    std::cout << "\nStations in 2019s:" << std::endl;
-    for (auto& station : stations) {
-        if (station.year >= 2010 && station.year < 2020) {
-            std::cout << station.name << " (" << station.year << ")" << std::endl;
-        }
-    }
+    // メールアドレスを学籍番号順にソート
+    std::sort(emails.begin(), emails.end());
 
-    std::cout << "\nStations in 2020s:" << std::endl;
-    for (auto& station : stations) {
-        if (station.year >= 2020) {
-            std::cout << station.name << " (" << station.year << ")" << std::endl;
-        }
+    // ソートされたメールアドレスを出力
+    std::cout << "Sorted emails:" << std::endl;
+    for (const auto& email : emails) {
+        std::cout << email << std::endl;
     }
 
     return 0;
