@@ -1,18 +1,17 @@
 #include <iostream>
-
-class Animal {
-public:
-    virtual void makeSound() { std::cout << "Some sound\n"; }
-};
-
-class Dog : public Animal {
-public:
-    void makeSound() override { std::cout << "Woof!\n"; }
-};
+#include "Circle.h"
+#include "Rectangle.h"
 
 int main() {
-    Animal* animal = new Dog();
-    animal->makeSound(); // "Woof!"
-    delete animal;
+    // Circleの例
+    Circle circle(5.0); // 半径5の円
+    circle.Size();
+    circle.Draw(); // 面積を表示
+
+    // Rectangleの例
+    Rectangle rectangle(4.0, 6.0); // 幅4、高さ6の長方形
+    rectangle.Size();
+    rectangle.Draw(); // 面積を表示
+
     return 0;
 }
