@@ -1,28 +1,58 @@
 #include <iostream>
+#include <fstream>
+#include <sstream>
+#include <vector>
 #include <thread>
 #include <mutex>
 #include <condition_variable>
 
 std::mutex mtx;
 std::condition_variable cv;
-int turn = 1;
+bool data_ready = false;
+std::vector<std::vector<int>> map_data;
 
-void printThread(int id, int next_turn) {
-    std::unique_lock<std::mutex> lock(mtx);
-    cv.wait(lock, [id] { return turn == id; });
-    std::cout << "thread" << id << std::endl;
-    turn = next_turn;
+void loadCSV(const std::string& filename) {
+    std::ifstream file(filename);
+    std::string line;
+    std::vector<std::vector<int>> temp_data;
+
+    while (std::getline(file, line)) {
+        std::istringstream ss(line);
+        std::string value;
+        std::vector<int> row;
+
+        while (std::getline(ss, value, ',')) {
+            row.push_back(std::stoi(value));
+        }
+        temp_data.push_back(row);
+    }
+
+    {
+        std::lock_guard<std::mutex> lock(mtx);
+        map_data = temp_data;
+        data_ready = true;
+    }
     cv.notify_all();
 }
 
-int main() {
-    std::thread t1(printThread, 1, 2);
-    std::thread t2(printThread, 2, 3);
-    std::thread t3(printThread, 3, 1);
+void displayMap() {
+    std::unique_lock<std::mutex> lock(mtx);
+    cv.wait(lock, [] { return data_ready; });
 
-    t1.join();
-    t2.join();
-    t3.join();
+    for (const auto& row : map_data) {
+        for (const auto& cell : row) {
+            std::cout << cell << " ";
+        }
+        std::cout << std::endl;
+    }
+}
+
+int main() {
+    std::thread loader(loadCSV, "map.csv");
+    std::thread displayer(displayMap);
+
+    loader.join();
+    displayer.join();
 
     return 0;
 }
